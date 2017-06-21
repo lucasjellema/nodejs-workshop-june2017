@@ -1,0 +1,14 @@
+{
+  "name": "mailclient",
+  "version": "1.0.0",
+  "description": "",
+  "main": "mailclient.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "emailjs": "^1.0.8"
+  }
+}
