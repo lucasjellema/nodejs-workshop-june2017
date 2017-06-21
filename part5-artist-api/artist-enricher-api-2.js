@@ -7,7 +7,7 @@ var http = require('http'),
   request = require('request'),
   express = require('express'),
   bodyParser = require('body-parser'),
-    artistEnricherApiLib = require('./artist-enricher-api-lib.js')
+  artistEnricherApiLib = require('./artist-enricher-api-lib.js')
   ;
 
 var PORT = 5100;

@@ -67,7 +67,7 @@ function handleArtists(req, res, artistName) {
     function (callback) {
       var artistUrl = spotifyAPI + '/search?q=' + encodeURI(artistName) + '&type=artist'; // use encodeURI to handle special characters in the name in the proper way
       route_options.uri = artistUrl;
-			console.log('1. Call to Spotify to find artist : '+ artistUrl); 
+      console.log('1. Call to Spotify to find artist : ' + artistUrl);
       // 1. invoke Spotify Search API to find the Artist and the spotify identifier; the response brings in genres and an image url 
       request(route_options, function handleSpotifySearchResponse(error, response, body) {
         if (error) {
@@ -99,7 +99,7 @@ function handleArtists(req, res, artistName) {
 
       // 2. now get discography - the most recent 50 albums (the maximum we can collect in one call)
       var albumsURL = spotifyAPI + '/artists/' + artistSpotifyId + '/albums' + '?limit=50&album_type=album';
-			console.log('2. Call to Spotify to collect list of albums : '+ albumsURL); 
+      console.log('2. Call to Spotify to collect list of albums : ' + albumsURL);
       artist.albums = [];
       route_options.uri = albumsURL;
       request(route_options, function (error, response, body) {
@@ -117,7 +117,7 @@ function handleArtists(req, res, artistName) {
       });//request     
     } // go get details on the albums in the list artist.albums
   ]
-  // all functions in the waterfall are complete, now we can proceed
+    // all functions in the waterfall are complete, now we can proceed
     , function (err, results) {
       console.log("Done waterfall!");
       if (err) {

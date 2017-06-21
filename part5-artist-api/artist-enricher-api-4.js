@@ -68,7 +68,7 @@ function handleArtists(req, res, artistName) {
     function (callback) {
       var artistUrl = spotifyAPI + '/search?q=' + encodeURI(artistName) + '&type=artist'; // use encodeURI to handle special characters in the name in the proper way
       route_options.uri = artistUrl;
-			console.log('1. Call to Spotify to find artist : '+ artistUrl); 
+      console.log('1. Call to Spotify to find artist : ' + artistUrl);
       // 1. invoke Spotify Search API to find the Artist and the spotify identifier; the response brings in genres and an image url 
       request(route_options, function handleSpotifySearchResponse(error, response, body) {
         if (error) {
@@ -101,7 +101,7 @@ function handleArtists(req, res, artistName) {
       // 2. now get discography - the most recent 50 albums (the maximum we can collect in one call)
       var albumsURL = spotifyAPI + '/artists/' + artistSpotifyId + '/albums' + '?limit=50&album_type=album';
       artist.albums = [];
-			console.log('2. Call to Spotify to collect list of albums : '+ albumsURL); 
+      console.log('2. Call to Spotify to collect list of albums : ' + albumsURL);
       route_options.uri = albumsURL;
 
       request(route_options, function (error, response, body) {
@@ -118,48 +118,48 @@ function handleArtists(req, res, artistName) {
         callback(null, artist.albums);
       });//request     
     }, // go get details on the albums in the list artist.albums
-				function (albums, callback) {
-					var albumsDetailsURL = spotifyAPI + '/albums/?ids=';
-					var albumArrays = [];
-					var i, j, chunk = 15;
-					// create albumArrays with no more than 15 album ids in each of them
-					for (i = 0, j = albums.length; i < j; i += chunk) {
-						albumArrays.push(albums.slice(i, i + chunk));
-					}
-					// parallel execution of each of the album arrays - note: we can invoke the albumDetailsURL with a maximum number of album id values per call
-					async.forEachOf(albumArrays, function (value, key, callback) {
-						var albumsDetailsURL = spotifyAPI + '/albums/?ids=';
-						// concatenate album id's together
-						for (var i = 0; i < value.length; i++) {
-							albumsDetailsURL += (i > 0 ? ',' : '') + value[i].spotifyId;
-						}//for
-						console.log('3. Call to Spotify to collect album (release date) details: '+ albumsDetailsURL); 
-						// invoke REST API to retrieve details for a set of albums
-            route_options.uri = albumsDetailsURL;
+    function (albums, callback) {
+      var albumsDetailsURL = spotifyAPI + '/albums/?ids=';
+      var albumArrays = [];
+      var i, j, chunk = 15;
+      // create albumArrays with no more than 15 album ids in each of them
+      for (i = 0, j = albums.length; i < j; i += chunk) {
+        albumArrays.push(albums.slice(i, i + chunk));
+      }
+      // parallel execution of each of the album arrays - note: we can invoke the albumDetailsURL with a maximum number of album id values per call
+      async.forEachOf(albumArrays, function (value, key, callback) {
+        var albumsDetailsURL = spotifyAPI + '/albums/?ids=';
+        // concatenate album id's together
+        for (var i = 0; i < value.length; i++) {
+          albumsDetailsURL += (i > 0 ? ',' : '') + value[i].spotifyId;
+        }//for
+        console.log('3. Call to Spotify to collect album (release date) details: ' + albumsDetailsURL);
+        // invoke REST API to retrieve details for a set of albums
+        route_options.uri = albumsDetailsURL;
 
-						request(route_options, function (error, response, body) {
-							var albumDetailsResponse = JSON.parse(body);
-							for (var i = 0; i < albumDetailsResponse.albums.length; i++) {
-								// clumsy way to correct for incomplete release dates (year only for example)
-								albums[(i + key * chunk)].releaseDate =
-									(albumDetailsResponse.albums[i].release_date_precision == 'day'
-										? albumDetailsResponse.albums[i].release_date
-										: albumDetailsResponse.albums[i].release_date + '-01-01'
-									);
-							}// for
-							// return the fact that this albumArray is done - up to forEachOf
-							callback();
-						}); //request
-					}, function (err) { // completion of the forEachOf
-						// after the asynch.forEachOf, when all branches have done their callback()
-						// done with all parallel processing; notify the top level (waterfall) that we are done here
-            console.log("Done foreach!");
-						callback(err, albums);
-					}
-					);// forEachOf						  
-				}
+        request(route_options, function (error, response, body) {
+          var albumDetailsResponse = JSON.parse(body);
+          for (var i = 0; i < albumDetailsResponse.albums.length; i++) {
+            // clumsy way to correct for incomplete release dates (year only for example)
+            albums[(i + key * chunk)].releaseDate =
+              (albumDetailsResponse.albums[i].release_date_precision == 'day'
+                ? albumDetailsResponse.albums[i].release_date
+                : albumDetailsResponse.albums[i].release_date + '-01-01'
+              );
+          }// for
+          // return the fact that this albumArray is done - up to forEachOf
+          callback();
+        }); //request
+      }, function (err) { // completion of the forEachOf
+        // after the asynch.forEachOf, when all branches have done their callback()
+        // done with all parallel processing; notify the top level (waterfall) that we are done here
+        console.log("Done foreach!");
+        callback(err, albums);
+      }
+      );// forEachOf						  
+    }
   ]
-  // all functions in the waterfall are complete, now we can proceed
+    // all functions in the waterfall are complete, now we can proceed
     , function (err, results) {
       console.log("Done waterfall!");
       if (err) {
